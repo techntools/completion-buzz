@@ -3,7 +3,7 @@ class Searcher():
 
     def findmatches(self, wordset, prefix, matchtype=matchtype[2]):
         # Python's difflib.get_close_matches also sounds useful
-        return [v for v in wordset if v.startswith(prefix)]
+        return {v for v in wordset if v.startswith(prefix)}
 
 
 if __name__ == '__main__':

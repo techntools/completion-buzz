@@ -88,8 +88,7 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
 
                             if 'tagcompletions' in msg:
                                 tc = set(msg['tagcompletions'])
-                                words = set(matches)
-                                matches = list(words) + [t for t in tc if t not in words]
+                                matches = tc.union(matches)
 
                             response = []
                             for m in matches:
