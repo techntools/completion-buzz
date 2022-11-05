@@ -41,7 +41,7 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
 
         while True:
             try:
-                data = self.request.recv(4096 * 4).decode('utf-8')
+                data = self.request.recv(4096 * 9).decode('utf-8')
             except socket.error:
                 print("=== socket error ===")
                 break
@@ -87,12 +87,17 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
                             matches = engine.findmatches(msg['target'])
 
                             if 'tagcompletions' in msg:
-                                tc = set(msg['tagcompletions'])
-                                matches = tc.union(matches)
+                                matches = set(msg['tagcompletions']).union(matches)
+
+                            if 'bufferkeywords' in msg:
+                                matches = engine._searcher.findmatches(
+                                    matches.union(msg['bufferkeywords']),
+                                    msg['target']
+                                )
 
                             response = []
                             for m in matches:
-                                response.append({ 'word': m, 'menu': 'CB' })
+                                response.append({ 'word': m })
                         else:
                             # Note: Keywords start with albhabets, _, $ only for programming languages.
                             keywordpattern = '[a-zA-Z0-9_]+'
