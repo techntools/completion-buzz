@@ -42,32 +42,16 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
         while True:
             try:
                 data = self.request.recv(4096 * 9).decode('utf-8')
-            except socket.error:
-                print("=== socket error ===")
-                break
-            if data == '':
-                print("=== socket closed ===")
-                break
+                if data == '':
+                    print("=== socket closed ===")
+                    break
 
-            try:
                 decoded = json.loads(data)
-            except ValueError:
-                print("json decoding failed")
-                decoded = [-1, '']
+                msg = json.loads(decoded[1])
 
-            # Send a response if the sequence number is positive.
-            # Negative numbers are used for "eval" responses.
-            if decoded[0] >= 0:
-                if decoded[1] == 'hello!':
-                    response = "got it"
-                    id = decoded[0]
-                elif decoded[1] == 'hello channel!':
-                    response = "got that"
-                    # response is not to a specific message callback but to the
-                    # channel callback, need to use ID zero
-                    id = 0
-                else:
-                    msg = json.loads(decoded[1])
+                # Send a response if the sequence number is positive.
+                # Negative numbers are used for "eval" responses.
+                if decoded[0] >= 0:
                     if 'wid' in msg:
                         wid = msg['wid']
 
@@ -81,7 +65,7 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
                             engine = CompletionEngine()
                             self.per_working_dir[wid] = engine
 
-                        response = f'CWD is {wid}'
+                        response = f'WID is {wid}'
 
                         if 'target' in msg:
                             matches = engine.findmatches(msg['target'])
@@ -108,12 +92,20 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
 
                     id = decoded[0]
 
-                encoded = json.dumps([id, response])
+                    encoded = json.dumps([id, response])
 
+                    self.request.sendall(encoded.encode('utf-8'))
+
+                print("Received", json.dumps(msg, indent=4))
+                print("Sending", json.dumps(response, indent=4))
+            except ValueError:
+                response = "JSON decoding failed"
+                print(response)
+                encoded = json.dumps([-1, response])
                 self.request.sendall(encoded.encode('utf-8'))
-
-            print("received: {0}".format(data))
-            print("Sending {0}".format(encoded))
+            except socket.error:
+                print("=== socket error ===")
+                break
 
         thesocket = None
 
@@ -135,9 +127,10 @@ if __name__ == "__main__":
     # Exit the server thread when the main thread terminates
     server_thread.daemon = True
     server_thread.start()
-    print("Server loop running in thread: ", server_thread.name)
 
+    print("Server loop running in thread: ", server_thread.name)
     print("Listening on port {0}".format(PORT))
+
     while True:
         typed = sys.stdin.readline()
         if "quit" in typed:
