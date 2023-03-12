@@ -22,6 +22,7 @@ import socket
 import sys
 import threading
 import socketserver
+import daemon
 
 from engine import CompletionEngine
 
@@ -115,32 +116,12 @@ class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
 
 
 if __name__ == "__main__":
-    HOST, PORT = "localhost", 8765
+    with daemon.DaemonContext():
+        HOST, PORT = "localhost", 8765
 
-    server = ThreadedTCPServer((HOST, PORT), ThreadedTCPRequestHandler)
-    ip, port = server.server_address
+        server = ThreadedTCPServer((HOST, PORT), ThreadedTCPRequestHandler)
 
-    # Start a thread with the server -- that thread will then start one
-    # more thread for each request
-    server_thread = threading.Thread(target=server.serve_forever)
-
-    # Exit the server thread when the main thread terminates
-    server_thread.daemon = True
-    server_thread.start()
-
-    print("Server loop running in thread: ", server_thread.name)
-    print("Listening on port {0}".format(PORT))
-
-    while True:
-        typed = sys.stdin.readline()
-        if "quit" in typed:
-            print("Goodbye!")
-            break
-        if thesocket is None:
-            print("No socket yet")
-        else:
-            print("Sending {0}".format(typed))
-            thesocket.sendall(typed.encode('utf-8'))
-
-    server.shutdown()
-    server.server_close()
+        # Start a thread with the server -- that thread will then start one
+        # more thread for each request
+        server_thread = threading.Thread(target=server.serve_forever)
+        server_thread.start()
