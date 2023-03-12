@@ -34,7 +34,7 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
     per_working_dir = {}
 
     def handle(self):
-        print("=== socket opened ===")
+        # === socket opened ===
 
         global thesocket
 
@@ -44,7 +44,7 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
             try:
                 data = self.request.recv(4096 * 9).decode('utf-8')
                 if data == '':
-                    print("=== socket closed ===")
+                    # === socket closed ===
                     break
 
                 decoded = json.loads(data)
@@ -96,16 +96,12 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
                     encoded = json.dumps([id, response])
 
                     self.request.sendall(encoded.encode('utf-8'))
-
-                print("Received", json.dumps(msg, indent=4))
-                print("Sending", json.dumps(response, indent=4))
             except ValueError:
                 response = "JSON decoding failed"
-                print(response)
                 encoded = json.dumps([-1, response])
                 self.request.sendall(encoded.encode('utf-8'))
             except socket.error:
-                print("=== socket error ===")
+                # === socket error ===
                 break
 
         thesocket = None
