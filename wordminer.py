@@ -5,6 +5,7 @@ import re
 class WordMiner():
     def __init__(self, initfilelist=[]):
         self.words = set()
+        self.filewords = {}
 
     def minetheline(self, keywordpattern, line):
         return re.findall(keywordpattern, line)
@@ -13,12 +14,17 @@ class WordMiner():
         results = re.findall(keywordpattern, filecontent)
         self.words.update(results)
 
+    def update_words_per_file(self, fileloc):
+        if fileloc not in self.filewords:
+            self.filewords[fileloc] = {}
+
+        with open(fileloc) as f:
+            for _, line in enumerate(f, 1):
+                self.words.update(self.minetheline('[a-zA-Z0-9_]+', line))
+
 
 if __name__ == '__main__':
     import time
-    from multiprocessing import Pool as ProcessPool
-
-    pool = ProcessPool(4)
 
     wm = WordMiner()
 
