@@ -19,7 +19,10 @@ class CompletionEngine():
         for file, content in self._filereader.filesread.items():
             self._wordminer.mine(keywordpattern, content)
 
-    def findmatches(self, prefix):
+    def findmatches(self, prefix, wordset=None):
+        if wordset:
+            return self._searcher.findmatches(wordset, prefix)
+
         return self._searcher.findmatches(self._wordminer.words, prefix)
 
 
