@@ -19,7 +19,6 @@
 
 import json
 import socket
-import sys
 import threading
 import socketserver
 import daemon
