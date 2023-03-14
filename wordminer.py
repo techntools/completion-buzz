@@ -7,13 +7,8 @@ class WordMiner():
         self.words = set()
         self.filewords = {}
 
-    def minetheline(self, keywordpattern, line):
-        return re.findall(keywordpattern, line)
-
     def mine(self, keywordpattern, filecontent):
-        results = re.findall(keywordpattern, filecontent)
-        self.words.update(results)
-        return results
+        return re.findall(keywordpattern, filecontent)
 
     def update_words_of_file(self, keywordpattern, fileloc, filelines=None):
         self.filewords[fileloc] = set()
