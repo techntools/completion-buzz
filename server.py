@@ -82,11 +82,19 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
                             response = []
                             for m in matches:
                                 response.append({ 'word': m })
-                        else:
-                            # Note: Keywords start with albhabets, _, $ only for programming languages.
-                            keywordpattern = '[a-zA-Z0-9_]+'
-                            filelist = msg['filelist']
-                            engine.startmining(keywordpattern, filelist)
+
+                        # Note: Keywords start with albhabets, _, $ only for programming languages.
+                        keywordpattern = '[a-zA-Z0-9_]+'
+
+                        if 'filelist' in msg:
+                            engine.update_words_per_file(keywordpattern, msg['filelist'])
+
+                        if 'filelines' in msg and 'fileloc' in msg:
+                            engine.update_words_of_file(
+                                keywordpattern,
+                                msg['fileloc'],
+                                msg['filelines']
+                            )
                     else:
                         response = "What ?"
 

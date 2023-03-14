@@ -25,6 +25,13 @@ class CompletionEngine():
 
         return self._searcher.findmatches(self._wordminer.words, prefix)
 
+    def update_words_per_file(self, keywordpattern, filelocs):
+        for fileloc in filelocs:
+            self._wordminer.update_words_of_file(keywordpattern, fileloc)
+
+    def update_words_of_file(self, keywordpattern, fileloc, filelines):
+        self._wordminer.update_words_of_file(keywordpattern, fileloc, filelines)
+
 
 if __name__ == '__main__':
     import time

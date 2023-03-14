@@ -2,8 +2,11 @@ from wordminer import WordMiner
 
 
 def test_wordminer():
+    keywordpattern = '[a-zA-Z0-9_]+'
+
     wordminer = WordMiner()
-    wordminer.update_words_per_file('./tests/words.txt')
+    wordminer.update_words_of_file(keywordpattern, './tests/words.txt')
+
     assert len(wordminer.words) == 113809
 
 

@@ -13,14 +13,21 @@ class WordMiner():
     def mine(self, keywordpattern, filecontent):
         results = re.findall(keywordpattern, filecontent)
         self.words.update(results)
+        return results
 
-    def update_words_per_file(self, fileloc):
-        if fileloc not in self.filewords:
-            self.filewords[fileloc] = {}
+    def update_words_of_file(self, keywordpattern, fileloc, filelines=None):
+        self.filewords[fileloc] = set()
 
-        with open(fileloc) as f:
-            for _, line in enumerate(f, 1):
-                self.words.update(self.minetheline('[a-zA-Z0-9_]+', line))
+        if filelines is None:
+            with open(fileloc) as f:
+                self.filewords[fileloc].update(self.mine(keywordpattern, f.read()))
+        else:
+            self.filewords[fileloc].update(self.mine(keywordpattern, filelines))
+
+        # Refreshing wordset
+        self.words = set()
+        for key, _ in self.filewords.items():
+            self.words.update(self.filewords[key])
 
 
 if __name__ == '__main__':
