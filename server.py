@@ -41,7 +41,7 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
 
         while True:
             try:
-                data = self.request.recv(4096 * 9).decode('utf-8')
+                data = self.request.recv(4096 * 50).decode('utf-8')
                 if data == '':
                     # === socket closed ===
                     break
