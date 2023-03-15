@@ -113,13 +113,10 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
 
                     self.request.sendall(encoded.encode('utf-8'))
             except ValueError:
-                print('valuerror')
                 response = "JSON decoding failed"
                 encoded = json.dumps([-1, response])
                 self.request.sendall(encoded.encode('utf-8'))
             except socket.error:
-                print('valuerror', socket.error)
-
                 # === socket error ===
                 break
 
