@@ -74,9 +74,17 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
                                 matches = set(msg['tagcompletions']).union(matches)
 
                             if 'bufferkeywords' in msg:
+                                bufferkeywords = msg['bufferkeywords']
+
+                                if isinstance(bufferkeywords[0], dict):
+                                    bufferkeywords = []
+
+                                    for bk in msg['bufferkeywords']:
+                                        bufferkeywords.append([*bk.values()][0])
+
                                 matches = engine.findmatches(
                                     msg['target'],
-                                    matches.union(msg['bufferkeywords']),
+                                    matches.union(bufferkeywords),
                                 )
 
                             response = []
