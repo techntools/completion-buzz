@@ -76,16 +76,17 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
                             if 'bufferkeywords' in msg:
                                 bufferkeywords = msg['bufferkeywords']
 
-                                if isinstance(bufferkeywords[0], dict):
-                                    bufferkeywords = []
+                                if len(bufferkeywords) > 0:
+                                    if isinstance(bufferkeywords[0], dict):
+                                        bufferkeywords = []
 
-                                    for bk in msg['bufferkeywords']:
-                                        bufferkeywords.append([*bk.values()][0])
+                                        for bk in msg['bufferkeywords']:
+                                            bufferkeywords.append([*bk.values()][0])
 
-                                matches = engine.findmatches(
-                                    msg['target'],
-                                    matches.union(bufferkeywords),
-                                )
+                                    matches = engine.findmatches(
+                                        msg['target'],
+                                        matches.union(bufferkeywords),
+                                    )
 
                             response = []
                             for m in matches:
@@ -112,10 +113,13 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
 
                     self.request.sendall(encoded.encode('utf-8'))
             except ValueError:
+                print('valuerror')
                 response = "JSON decoding failed"
                 encoded = json.dumps([-1, response])
                 self.request.sendall(encoded.encode('utf-8'))
             except socket.error:
+                print('valuerror', socket.error)
+
                 # === socket error ===
                 break
 
