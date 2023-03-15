@@ -93,7 +93,7 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
                                 response.append({ 'word': m })
 
                         # Note: Keywords start with albhabets, _, $ only for programming languages.
-                        keywordpattern = '[a-zA-Z0-9_]+'
+                        keywordpattern = r'[$\w_]+'
 
                         if 'filelist' in msg:
                             engine.update_words_per_file(keywordpattern, msg['filelist'])
