@@ -4,7 +4,7 @@ import re
 
 class WordMiner():
     def __init__(self, initfilelist=[]):
-        self.words = set()
+        self.words = []
         self.filewords = {}
 
     def mine(self, keywordpattern, filecontent):
@@ -20,9 +20,11 @@ class WordMiner():
             self.filewords[fileloc].update(self.mine(keywordpattern, filelines))
 
         # Refreshing wordset
-        self.words = set()
+        words = set()
         for key, _ in self.filewords.items():
-            self.words.update(self.filewords[key])
+            words.update(self.filewords[key])
+
+        self.words = list(words)
 
 
 if __name__ == '__main__':

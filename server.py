@@ -68,25 +68,26 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
                         response = f'WID is {wid}'
 
                         if 'target' in msg:
-                            matches = engine.findmatches(msg['target'])
+                            bufferkeywords = msg.get('bufferkeywords', [])
+                            if len(bufferkeywords) > 0:
+                                if isinstance(bufferkeywords[0], dict):
+                                    bufferkeywords = []
+                                    for bk in msg['bufferkeywords']:
+                                        bufferkeywords.append([*bk.values()][0])
 
-                            if 'tagcompletions' in msg:
-                                matches = set(msg['tagcompletions']).union(matches)
+                            matches = engine.findmatches(
+                                msg['target'],
+                                bufferkeywords,
+                            )
 
-                            if 'bufferkeywords' in msg:
-                                bufferkeywords = msg['bufferkeywords']
+                            matches += engine.findmatches(msg['target'])
 
-                                if len(bufferkeywords) > 0:
-                                    if isinstance(bufferkeywords[0], dict):
-                                        bufferkeywords = []
+                            matches += engine.findmatches(
+                                msg['target'],
+                                msg.get('tagcompletions', []),
+                            )
 
-                                        for bk in msg['bufferkeywords']:
-                                            bufferkeywords.append([*bk.values()][0])
-
-                                    matches = engine.findmatches(
-                                        msg['target'],
-                                        matches.union(bufferkeywords),
-                                    )
+                            matches = set(matches)
 
                             response = []
                             for m in matches:
