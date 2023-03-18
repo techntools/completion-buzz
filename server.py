@@ -83,7 +83,7 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
                 engine.update_words_of_file(
                     keywordpattern,
                     msg['fileloc'],
-                    msg['filelines']
+                    '\n'.join(msg['filelines'])
                 )
 
             return f'WID is {wid}'
