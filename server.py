@@ -26,18 +26,70 @@ import daemon
 from engine import CompletionEngine
 
 
-thesocket = None
-
-
 class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
-    per_working_dir = {}
+    workspaces = {}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.workspaces = {}
+
+    def completions(self, msg):
+        wid = msg.get('wid', None)
+
+        if wid is None:
+            return "What ?"
+
+        if 'closing' in msg:
+            del self.workspaces[wid]
+            return []
+
+        engine = self.workspaces.get(wid, None)
+
+        if engine is None:
+            engine = CompletionEngine()
+            self.workspaces[wid] = engine
+
+        if 'target' in msg:
+            bufferkeywords = msg.get('bufferkeywords', [])
+            if len(bufferkeywords) > 0:
+                if isinstance(bufferkeywords[0], dict):
+                    bufferkeywords = []
+                    for bk in msg['bufferkeywords']:
+                        bufferkeywords.append([*bk.values()][0])
+
+            matches = engine.findmatches(
+                msg['target'],
+                bufferkeywords,
+            )
+
+            matches += engine.findmatches(msg['target'])
+
+            matches += engine.findmatches(
+                msg['target'],
+                msg.get('tagcompletions', []),
+            )
+
+            matches = set(matches)
+
+            return [{ 'word': m } for m in matches]
+        else:
+            # Note: Keywords start with albhabets, _, $ only for programming languages.
+            keywordpattern = r'[$\w_]+'
+
+            if 'filelist' in msg:
+                engine.update_words_per_file(keywordpattern, msg['filelist'])
+
+            if 'filelines' in msg and 'fileloc' in msg:
+                engine.update_words_of_file(
+                    keywordpattern,
+                    msg['fileloc'],
+                    msg['filelines']
+                )
+
+            return f'WID is {wid}'
 
     def handle(self):
         # === socket opened ===
-
-        global thesocket
-
-        thesocket = self.request
 
         while True:
             try:
@@ -47,66 +99,11 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
                     break
 
                 decoded = json.loads(data)
-                msg = json.loads(decoded[1])
 
                 # Send a response if the sequence number is positive.
                 # Negative numbers are used for "eval" responses.
                 if decoded[0] >= 0:
-                    if 'wid' in msg:
-                        wid = msg['wid']
-
-                        if 'closing' in msg:
-                            del self.per_working_dir[wid]
-                            continue
-
-                        engine = self.per_working_dir.get(wid, None)
-
-                        if engine is None:
-                            engine = CompletionEngine()
-                            self.per_working_dir[wid] = engine
-
-                        response = f'WID is {wid}'
-
-                        if 'target' in msg:
-                            bufferkeywords = msg.get('bufferkeywords', [])
-                            if len(bufferkeywords) > 0:
-                                if isinstance(bufferkeywords[0], dict):
-                                    bufferkeywords = []
-                                    for bk in msg['bufferkeywords']:
-                                        bufferkeywords.append([*bk.values()][0])
-
-                            matches = engine.findmatches(
-                                msg['target'],
-                                bufferkeywords,
-                            )
-
-                            matches += engine.findmatches(msg['target'])
-
-                            matches += engine.findmatches(
-                                msg['target'],
-                                msg.get('tagcompletions', []),
-                            )
-
-                            matches = set(matches)
-
-                            response = []
-                            for m in matches:
-                                response.append({ 'word': m })
-
-                        # Note: Keywords start with albhabets, _, $ only for programming languages.
-                        keywordpattern = r'[$\w_]+'
-
-                        if 'filelist' in msg:
-                            engine.update_words_per_file(keywordpattern, msg['filelist'])
-
-                        if 'filelines' in msg and 'fileloc' in msg:
-                            engine.update_words_of_file(
-                                keywordpattern,
-                                msg['fileloc'],
-                                msg['filelines']
-                            )
-                    else:
-                        response = "What ?"
+                    response = self.completions(json.loads(decoded[1]))
 
                     id = decoded[0]
 
@@ -120,8 +117,6 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
             except socket.error:
                 # === socket error ===
                 break
-
-        thesocket = None
 
 
 class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
