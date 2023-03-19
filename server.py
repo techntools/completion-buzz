@@ -89,13 +89,10 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
             return f'WID is {wid}'
 
     def handle(self):
-        # === socket opened ===
-
         while True:
             try:
                 data = self.request.recv(1024 * 1024 * 5).decode('utf-8')
                 if data == '':
-                    # === socket closed ===
                     break
 
                 decoded = json.loads(data)
@@ -115,7 +112,6 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
                 encoded = json.dumps([-1, response])
                 self.request.sendall(encoded.encode('utf-8'))
             except socket.error:
-                # === socket error ===
                 break
 
 
