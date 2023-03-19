@@ -62,7 +62,7 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
                 bufferkeywords,
             )
 
-            matches += engine.findmatches(msg['target'])
+            matches += engine.findmatches_from_pool(msg['target'])
 
             matches += engine.findmatches(
                 msg['target'],

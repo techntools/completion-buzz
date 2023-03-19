@@ -1,7 +1,7 @@
 class Searcher():
     matchtype = ('substring', 'fuzzy', 'prefix')
 
-    def findmatches(self, wordset, prefix, matchtype=matchtype[2]):
+    def findmatches(self, prefix, wordset, matchtype=matchtype[2]):
         # Python's difflib.get_close_matches also sounds useful
         if prefix.isupper():
             return [ v for v in wordset if v.startswith(prefix) ]
