@@ -4,7 +4,7 @@ from searcher import Searcher
 
 
 class CompletionEngine():
-    def __init__(self, initfilelist=[]):
+    def __init__(self):
         self._filereader = FileReader()
         self._wordminer = WordMiner()
         self._searcher = Searcher()
