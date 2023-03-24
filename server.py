@@ -51,11 +51,10 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
 
         if 'target' in msg:
             bufferkeywords = msg.get('bufferkeywords', [])
-            if len(bufferkeywords) > 0:
-                if isinstance(bufferkeywords[0], dict):
-                    bufferkeywords = []
-                    for bk in msg['bufferkeywords']:
-                        bufferkeywords.append([*bk.values()][0])
+            if len(bufferkeywords) > 0 and isinstance(bufferkeywords[0], dict):
+                bufferkeywords = []
+                for bk in msg['bufferkeywords']:
+                    bufferkeywords.append([*bk.values()][0])
 
             return engine.findmatches(
                 msg['target'],
