@@ -9,7 +9,9 @@ class CompletionEngine():
         self._wordminer = WordMiner()
         self._searcher = Searcher()
 
-        self.wordpool = self._wordminer.words
+    @property
+    def wordpool(self):
+        return self._wordminer.words
 
     def minethefile(self, keywordpattern, file):
         content = self._filereader.readfile(file)
