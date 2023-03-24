@@ -53,7 +53,7 @@ if __name__ == '__main__':
     ])
 
     start = time.perf_counter()
-    matches = engine.findmatches('c')
+    matches = engine.findmatches_from_pool('c')
     end = time.perf_counter()
 
     print('{0:<10}.{1:<8} : {2:<8}'.format(engine.__module__, engine.startmining.__name__, end - start))
