@@ -57,21 +57,10 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
                     for bk in msg['bufferkeywords']:
                         bufferkeywords.append([*bk.values()][0])
 
-            matches = engine.findmatches(
+            return engine.findmatches(
                 msg['target'],
-                bufferkeywords,
+                set(bufferkeywords + engine.wordpool + msg.get('tagcompletions', [])),
             )
-
-            matches += engine.findmatches_from_pool(msg['target'])
-
-            matches += engine.findmatches(
-                msg['target'],
-                msg.get('tagcompletions', []),
-            )
-
-            matches = set(matches)
-
-            return [{ 'word': m } for m in matches]
         else:
             # Note: Keywords start with albhabets, _, $ only for programming languages.
             keywordpattern = r'[$\w_]+'
