@@ -34,47 +34,41 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
         self.workspaces = {}
 
     def completions(self, msg):
-        wid = msg.get('wid', None)
-
-        if wid is None:
-            return "What ?"
-
-        if 'closing' in msg:
-            del self.workspaces[wid]
-            return []
+        # Adding defensive if for checking wid is ok but would just add to
+        # delay. Client should make sure that wid is passed. Otherwise use
+        # default workspace. But it will include words from every workspace
+        # which will add up to more delay.
+        wid = msg.get('wid', 'workspace')
 
         engine = self.workspaces.get(wid, None)
-
         if engine is None:
             engine = CompletionEngine()
             self.workspaces[wid] = engine
 
         if 'target' in msg:
-            bufferkeywords = msg.get('bufferkeywords', [])
-            if len(bufferkeywords) > 0 and isinstance(bufferkeywords[0], dict):
-                bufferkeywords = []
-                for bk in msg['bufferkeywords']:
-                    bufferkeywords.append([*bk.values()][0])
-
             return engine.findmatches(
                 msg['target'],
-                set(bufferkeywords + engine.wordpool + msg.get('tagcompletions', [])),
+                set(msg.get('bufferkeywords', []) + engine.wordpool + msg.get('tagcompletions', [])),
             )
-        else:
-            # Note: Keywords start with albhabets, _, $ only for programming languages.
-            keywordpattern = r'[$\w_]+'
 
-            if 'filelist' in msg:
-                engine.update_words_per_file(keywordpattern, msg['filelist'])
+        # Note: Keywords start with albhabets, _, $ only for programming languages.
+        keywordpattern = r'[$\w_]+'
 
-            if 'filelines' in msg and 'fileloc' in msg:
-                engine.update_words_of_file(
-                    keywordpattern,
-                    msg['fileloc'],
-                    '\n'.join(msg['filelines'])
-                )
+        if 'filelist' in msg:
+            engine.update_words_per_file(keywordpattern, msg['filelist'])
 
-            return f'WID is {wid}'
+        if 'filelines' in msg and 'fileloc' in msg:
+            engine.update_words_of_file(
+                keywordpattern,
+                msg['fileloc'],
+                '\n'.join(msg['filelines'])
+            )
+
+        if 'closing' in msg:
+            del self.workspaces[wid]
+            return []
+
+        return f'WID is {wid}'
 
     def handle(self):
         while True:
