@@ -40,33 +40,36 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
         # which will add up to more delay.
         wid = msg.get('wid', 'workspace')
 
-        engine = self.workspaces.get(wid, None)
-        if engine is None:
-            engine = CompletionEngine()
-            self.workspaces[wid] = engine
+        try:
+            engine = self.workspaces[wid]
 
-        if 'target' in msg:
-            return engine.findmatches(
-                msg['target'],
-                set(msg.get('bufferkeywords', []) + engine.wordpool + msg.get('tagcompletions', [])),
-            )
+            if 'target' in msg:
+                return engine.findmatches(
+                    msg['target'],
+                    set(msg.get('bufferkeywords', []) + engine.wordpool + msg.get('tagcompletions', [])),
+                )
 
-        # Note: Keywords start with albhabets, _, $ only for programming languages.
-        keywordpattern = r'[$\w_]+'
+            # Note: Keywords start with albhabets, _, $ only for programming languages.
+            keywordpattern = r'[$\w_]+'
 
-        if 'filelist' in msg:
-            engine.update_words_per_file(keywordpattern, msg['filelist'])
+            if 'filelist' in msg:
+                engine.update_words_per_file(keywordpattern, msg['filelist'])
 
-        if 'filelines' in msg and 'fileloc' in msg:
-            engine.update_words_of_file(
-                keywordpattern,
-                msg['fileloc'],
-                '\n'.join(msg['filelines'])
-            )
+            if 'filelines' in msg and 'fileloc' in msg:
+                engine.update_words_of_file(
+                    keywordpattern,
+                    msg['fileloc'],
+                    '\n'.join(msg['filelines'])
+                )
 
-        if 'closing' in msg:
-            del self.workspaces[wid]
-            return []
+            if 'closing' in msg:
+                del self.workspaces[wid]
+                return []
+        except KeyError as ke:
+            if ke.args[0] == wid:
+                self.workspaces[wid] = CompletionEngine()
+        except Exception as e:
+            raise e
 
         return f'WID is {wid}'
 
