@@ -49,6 +49,10 @@ For words matching in current buffer, it scans the current buffer in Vim itself.
 
 Merges matches from current buffer, tags and word pool that server holds.
 
+## My setup with LSP
+
+I am using ```C-X C-O``` omnicompletions with this [yegappan/lsp](https://github.com/yegappan/lsp). This LSP is Vim 9 only.
+
 ## About forks
 My forks remove code that is not needed for the completion server and to improve performance.
 
