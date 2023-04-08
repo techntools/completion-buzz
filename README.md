@@ -1,4 +1,7 @@
 ## Installation
+
+Developed and tested with Vim only.
+
 ```
 call minpac#add('inkarkat/vim-ingo-library')
 call minpac#add('techntools/vim-CompleteHelper')
