@@ -87,7 +87,7 @@ function! s:CompleteHandler(opt, ctx)
     let l:typed = getline('.')[l:startcol - 1 : col('.') - 2]
 
     let l:bufferkeywords = []
-    call CompleteHelper#FindMatches(l:bufferkeywords, '\<' . l:typed . '\k\+', {'complete': '.'})
+    call CompleteHelper#FindMatches(l:bufferkeywords, '\<' . l:typed . '\k\+')
 
     let l:HandleSugg = funcref('HandleSuggestions', [a:opt['name'], a:ctx, l:startcol])
 
