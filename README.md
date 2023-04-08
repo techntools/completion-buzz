@@ -2,7 +2,7 @@
 
 Developed and tested with Vim only.
 
-```
+``` vim script
 call minpac#add('inkarkat/vim-ingo-library')
 call minpac#add('techntools/vim-CompleteHelper')
 call minpac#add('techntools/asyncomplete.vim')
@@ -11,7 +11,7 @@ call minpac#add('techntools/completion-buzz', { 'branch': 'main' })
 
 ## My asyncomplete.vim settings
 
-```vimscript
+```vim script
 let g:asyncomplete_auto_popup = 1
 let g:asyncomplete_matchfuzzy = 1
 let g:asyncomplete_min_chars = 1
