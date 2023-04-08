@@ -21,7 +21,6 @@ import json
 import socket
 import threading
 import socketserver
-import daemon
 
 from engine import CompletionEngine
 
@@ -105,12 +104,11 @@ class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
 
 
 if __name__ == "__main__":
-    with daemon.DaemonContext():
-        HOST, PORT = "localhost", 8765
+    HOST, PORT = "localhost", 8765
 
-        server = ThreadedTCPServer((HOST, PORT), ThreadedTCPRequestHandler)
+    server = ThreadedTCPServer((HOST, PORT), ThreadedTCPRequestHandler)
 
-        # Start a thread with the server -- that thread will then start one
-        # more thread for each request
-        server_thread = threading.Thread(target=server.serve_forever)
-        server_thread.start()
+    # Start a thread with the server -- that thread will then start one
+    # more thread for each request
+    server_thread = threading.Thread(target=server.serve_forever)
+    server_thread.start()
