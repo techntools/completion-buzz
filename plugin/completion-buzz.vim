@@ -89,17 +89,20 @@ function! s:CompleteHandler(opt, ctx)
     let l:bufferkeywords = []
     call CompleteHelper#FindMatches(l:bufferkeywords, '\<' . l:typed . '\k\+')
 
-    let l:HandleSugg = funcref('HandleSuggestions', [a:opt['name'], a:ctx, l:startcol])
-
-    let l:tagcompletions = []
     try
         let l:tagcompletions = getcompletion(l:typed, 'tag')
     catch
         " For non project files, vim-gutentags does not generate tagsfile. Error
         " is thrown if no tagsfile is found.
+        let l:tagcompletions = []
     endtry
 
-    call ch_sendexpr(s:channel, json_encode({ 'wid': s:wid, 'target': l:typed, 'tagcompletions': l:tagcompletions, 'bufferkeywords': l:bufferkeywords }), { 'callback': l:HandleSugg })
+    call ch_sendexpr(s:channel, json_encode({
+                \ 'wid': s:wid,
+                \ 'target': l:typed,
+                \ 'tagcompletions': l:tagcompletions,
+                \ 'bufferkeywords': l:bufferkeywords
+                \ }), { 'callback': funcref('HandleSuggestions', [a:opt['name'], a:ctx, l:startcol]) })
     " call asyncomplete#complete(a:opt['name'], a:ctx, l:startcol, l:bufferkeywords)
 endfunction
 
