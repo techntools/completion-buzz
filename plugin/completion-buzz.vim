@@ -1,5 +1,3 @@
-let g:buzz_connection_delay = 1000
-
 let s:wid = str2nr(matchstr(reltimestr(reltime()), '\v\.@<=\d+')[1:])
 
 let s:msg_conn_failed = 'Failed to connect with completion server'
@@ -42,11 +40,17 @@ function! Leaving()
     call ch_sendexpr(s:channel, json_encode({ 'wid': s:wid, 'closing': v:true }))
 endfunction
 
-func! s:OnBuzzing(...)
+func! s:OnBuzzing(tid)
     let s:channel = ch_open('localhost:8765', s:chopt)
     if ch_status(s:channel) != 'open'
-        return s:WarnMsg(s:msg_conn_failed)
+        if timer_info(a:tid)[0]['repeat'] == 0
+            return s:WarnMsg(s:msg_conn_failed)
+        endif
+
+        return
     endif
+
+    call timer_stop(a:tid)
 
     call s:AfterInit()
 endfu
@@ -68,8 +72,8 @@ function! s:Init()
     let s:chopt = { 'noblock': 1 }
     let s:channel = ch_open('localhost:8765', s:chopt)
     if ch_status(s:channel) != 'open'
-        call system('python3 ' . expand('<sfile>:p:h') . '/server.py' . ' &')
-        return timer_start(g:buzz_connection_delay, function('s:OnBuzzing'))
+        call system('python3 ' . expand('<script>:p:h:h') . '/server.py' . ' &')
+        return timer_start(1000, function('s:OnBuzzing'), { 'repeat': 3 })
     endif
 
     call s:AfterInit()
