@@ -1,5 +1,8 @@
 let s:wid = str2nr(matchstr(reltimestr(reltime()), '\v\.@<=\d+')[1:])
 
+let s:chopt = { 'noblock': 1 }
+let s:channel = ch_open('localhost:8765', s:chopt)
+
 let s:msg_conn_failed = 'Failed to connect with completion server'
 
 function! AddBuffer(list, value) abort
@@ -38,6 +41,8 @@ function! Leaving()
     endif
 
     call ch_sendexpr(s:channel, json_encode({ 'wid': s:wid, 'closing': v:true }))
+
+    call ch_close(s:channel)
 endfunction
 
 func! s:OnBuzzing(tid)
@@ -69,8 +74,6 @@ function! s:Init()
         return s:WarnMsg('Please install asyncomplete.vim')
     endif
 
-    let s:chopt = { 'noblock': 1 }
-    let s:channel = ch_open('localhost:8765', s:chopt)
     if ch_status(s:channel) != 'open'
         call system('python3 ' . expand('<script>:p:h:h') . '/server.py' . ' &')
         return timer_start(1000, function('s:OnBuzzing'), { 'repeat': 3 })
