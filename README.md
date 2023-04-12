@@ -4,7 +4,6 @@ Developed and tested with Vim only.
 
 ``` vim script
 call minpac#add('inkarkat/vim-ingo-library')
-call minpac#add('techntools/vim-CompleteHelper')
 call minpac#add('techntools/asyncomplete.vim')
 call minpac#add('techntools/completion-buzz', { 'branch': 'main' })
 ```
