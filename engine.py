@@ -23,8 +23,8 @@ class CompletionEngine():
         for file, content in self._filereader.filesread.items():
             self._wordminer.mine(keywordpattern, content)
 
-    def findmatches(self, prefix, wordset):
-        return self._searcher.findmatches(prefix, wordset)
+    def findmatches(self, prefix, wordset, skip):
+        return self._searcher.findmatches(prefix, wordset, skip)
 
     def findmatches_from_pool(self, prefix):
         return self._searcher.findmatches(prefix, self._wordminer.words)

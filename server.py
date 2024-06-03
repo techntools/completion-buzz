@@ -46,6 +46,7 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
                 return engine.findmatches(
                     msg['target'],
                     set(msg.get('bufferkeywords', []) + engine.wordpool + msg.get('tagcompletions', [])),
+                    msg['skip'],
                 )
 
             # Note: Keywords start with albhabets, _, $ only for programming languages.
