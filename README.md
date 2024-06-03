@@ -3,7 +3,6 @@
 Developed and tested with Vim only.
 
 ``` vim script
-call minpac#add('inkarkat/vim-ingo-library')
 call minpac#add('techntools/asyncomplete.vim')
 call minpac#add('techntools/completion-buzz', { 'branch': 'main' })
 ```
@@ -11,17 +10,11 @@ call minpac#add('techntools/completion-buzz', { 'branch': 'main' })
 ## My asyncomplete.vim settings
 
 ```vim script
-let g:asyncomplete_auto_popup = 1
-let g:asyncomplete_matchfuzzy = 1
-let g:asyncomplete_min_chars = 1
-let g:asyncomplete_auto_completeopt = 0
-let g:asyncomplete_popup_delay = 0
-
 inoremap <expr> <cr> pumvisible() ? "\<C-y>\<ESC>a" : "\<cr>"
 
 function! s:check_back_space() abort
     let col = col('.') - 1
-    return !col || getline('.')[col - 1]  =~ '\s'
+    return !col || getline('.')[col - 1] =~ '\s'
 endfunction
 
 inoremap <silent><expr> <TAB>
@@ -34,8 +27,6 @@ inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
 au CmdwinEnter : let b:asyncomplete_enable = 0
 ```
 
-If you see some lag in completion, try changing value of ```g:asyncomplete_min_chars``` to more than 1
-
 ## How it works
 
 As soon as first instance of Vim is started, server starts and stays alive until you shut down your PC or kill the server process.
@@ -44,7 +35,7 @@ Upon VimEnter, it sends file list from ```set complete?``` to completion server 
 
 Upon every BufLeave, if buffer is modified, its contents are sent to server to refresh word pool. Every modification is passed only once. Same modications are not passed multiple times upon further BufLeave events.
 
-For words matching in current buffer, it scans the current buffer in Vim itself.
+For words matching in current buffer, it uses ```matchbufline```.
 
 Merges matches from current buffer, tags and word pool that server holds.
 
