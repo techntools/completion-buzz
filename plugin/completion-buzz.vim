@@ -83,44 +83,6 @@ function! s:Init()
 endfunction
 au VimEnter * call s:Init()
 
-function! s:FindMatches(pattern)
-    let l:matches = []
-
-    let l:save_view = winsaveview()
-    let l:cursor = getpos('.')[1:2]
-
-    let l:firstMatchPos = [0,0]
-    while ! complete_check()
-        let l:matchPos = searchpos(a:pattern, 'w')
-        if l:matchPos == [0,0] || l:matchPos == l:firstMatchPos
-            " Stop when no matches or wrapped around to first match.
-            break
-        endif
-        if l:firstMatchPos == [0,0]
-            " Record first match position to detect wrap-around.
-            let l:firstMatchPos = l:matchPos
-        endif
-
-        let l:matchEndPos = searchpos(a:pattern, 'cen')
-        if l:cursor[0] < l:matchPos[0] || l:cursor[0] > l:matchEndPos[0] || l:cursor[0] == l:matchPos[0] && l:cursor[1] < l:matchPos[1] || l:cursor[0] == l:matchEndPos[0] && l:cursor[1] > l:matchEndPos[1]
-            " Do not include a match around the cursor position; this would
-            " either just return the completion base, which Vim would not
-            " offer anyway, or the completion base and following text, which
-            " is unlikely to be desired, and not offered by the built-in
-            " completions, neither. By avoiding this match, we may shrink
-            " down the completion list to a single match, which would be
-            " inserted immediately without the user having to choose one.
-
-            " Extract and collect the match text.
-            call add(l:matches, ingo#text#Get(l:matchPos, l:matchEndPos))
-        endif
-    endwhile
-
-    call winrestview(l:save_view)
-
-    return l:matches
-endfunction
-
 function! HandleSuggestions(name, ctx, startcol, channel, msg)
     call asyncomplete#complete(a:name, a:ctx, a:startcol, a:msg)
 endfunc
@@ -139,13 +101,16 @@ function! s:CompleteHandler(opt, ctx)
         let l:tagcompletions = []
     endtry
 
+    let l:bufferkeywords = []
+    call map(matchbufline('%', '\<\c' . l:typed . '\k\+', 1, '$'), 'add(l:bufferkeywords, v:val.text)')
     call ch_sendexpr(s:channel, json_encode({
                 \ 'wid': s:wid,
                 \ 'target': l:typed,
                 \ 'tagcompletions': l:tagcompletions,
-                \ 'bufferkeywords': s:FindMatches('\<' . l:typed . '\k\+')
+                \ 'bufferkeywords': l:bufferkeywords,
+                \ 'skip': [l:typed, expand('<cword>')],
                 \ }), { 'callback': funcref('HandleSuggestions', [a:opt['name'], a:ctx, l:startcol]) })
-    " call asyncomplete#complete(a:opt['name'], a:ctx, l:startcol, s:FindMatches('\<' . l:typed . '\k\+'))
+    " call asyncomplete#complete(a:opt['name'], a:ctx, l:startcol, l:bufferkeywords)
 endfunction
 
 call asyncomplete#register_source({
