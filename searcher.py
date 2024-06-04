@@ -2,9 +2,9 @@ class Searcher():
     def findmatches(self, prefix, wordset, skip):
         # Python's difflib.get_close_matches also sounds useful
         if any(c.isupper() for c in prefix):
-            return [ { 'word': v, 'dup': 1 } for v in wordset if v.startswith(prefix) and (v not in skip) ]
+            return [ v for v in wordset if v.startswith(prefix) and (v not in skip) ]
         else:
-            return [ { 'word': v, 'dup': 1 } for v in wordset if v.lower().startswith(prefix) and (v not in skip) ]
+            return [ v for v in wordset if v.lower().startswith(prefix) and (v not in skip) ]
 
 
 if __name__ == '__main__':
